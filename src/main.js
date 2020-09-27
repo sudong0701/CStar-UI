@@ -3,6 +3,9 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import CSUI from './components/index'
+
+Vue.use(CSUI)
 
 Vue.config.productionTip = false
 
