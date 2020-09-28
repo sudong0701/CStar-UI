@@ -1,4 +1,5 @@
 import {csContainer, csAside, csFooter, csHeader, csMain} from './container/index'
+import { csRow, csCol } from './layout/index'
 
 
 const components = [
@@ -6,7 +7,9 @@ const components = [
     csAside,
     csFooter,
     csHeader,
-    csMain
+    csMain,
+    csRow,
+    csCol
 ]
 
 const install = function (Vue, options) {
@@ -26,5 +29,7 @@ export default {
     csAside,
     csFooter,
     csHeader,
-    csMain
+    csMain,
+    csRow,
+    csCol
 }
