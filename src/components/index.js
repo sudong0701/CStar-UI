@@ -1,6 +1,7 @@
 import '../assets/iconfont.css'
 import {csContainer, csAside, csFooter, csHeader, csMain} from './container/index'
 import { csRow, csCol } from './layout/index'
+import csButton from './button/index'
 
 
 const components = [
@@ -10,7 +11,8 @@ const components = [
     csHeader,
     csMain,
     csRow,
-    csCol
+    csCol,
+    csButton
 ]
 
 const install = function (Vue, options) {
@@ -32,5 +34,6 @@ export default {
     csHeader,
     csMain,
     csRow,
-    csCol
+    csCol,
+    csButton
 }
