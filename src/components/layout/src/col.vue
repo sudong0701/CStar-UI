@@ -48,9 +48,6 @@
             window.addEventListener('resize', (e)=> {
                 this.resize(e.target.innerWidth)
             })
-//            window.onresize = (e)=> {
-//                this.resize(e.target.innerWidth)
-//            }
         },
         computed: {
             realWidth() {
