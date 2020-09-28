@@ -7,6 +7,11 @@
     url('iconfont.svg?t=1601285113384#iconfont') format('svg'); /* iOS 4.1- */
 }
 
+* {
+    font-size: 14px;
+    line-height: 15px;
+}
+
 [class^="cs-icon-"] {
     font-family: "iconfont" !important;
     font-size: 24px;
