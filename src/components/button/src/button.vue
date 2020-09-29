@@ -1,5 +1,43 @@
 <template>
-    <div :class="`csButton csButton-${type}${realPlain}${realDisabled} ${realRound} ${realCircle} ${realSize}`">
+    <div :class="`csButton csButton-${type}${realPlain}${realDisabled} ${realRound} ${realCircle} ${realSize}`" @click="clickBtn" @dblclick="dblclickBtn">
+        <svg v-if="loading" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+            <rect transform="rotate(0 50 50) translate(0 -25)">
+                <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0s" repeatCount="indefinite"></animate>
+            </rect>
+            <rect transform="rotate(30 50 50) translate(0 -25)">
+                <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.083s" repeatCount="indefinite"></animate>
+            </rect>
+            <rect transform="rotate(60 50 50) translate(0 -25)">
+                <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.166s" repeatCount="indefinite"></animate>
+            </rect>
+            <rect transform="rotate(90 50 50) translate(0 -25)">
+                <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.25s" repeatCount="indefinite"></animate>
+            </rect>
+            <rect transform="rotate(120 50 50) translate(0 -25)">
+                <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.333s" repeatCount="indefinite"></animate>
+            </rect>
+            <rect transform="rotate(150 50 50) translate(0 -25)">
+                <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.416s" repeatCount="indefinite"></animate>
+            </rect>
+            <rect transform="rotate(180 50 50) translate(0 -25)">
+                <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.5s" repeatCount="indefinite"></animate>
+            </rect>
+            <rect transform="rotate(210 50 50) translate(0 -25)">
+                <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.583s" repeatCount="indefinite"></animate>
+            </rect>
+            <rect transform="rotate(240 50 50) translate(0 -25)">
+                <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.666s" repeatCount="indefinite"></animate>
+            </rect>
+            <rect transform="rotate(270 50 50) translate(0 -25)">
+                <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.75s" repeatCount="indefinite"></animate>
+            </rect>
+            <rect transform="rotate(300 50 50) translate(0 -25)">
+                <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.833s" repeatCount="indefinite"></animate>
+            </rect>
+            <rect transform="rotate(330 50 50) translate(0 -25)">
+                <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.916s" repeatCount="indefinite"></animate>
+            </rect>
+        </svg>
         <i :class="icon"></i>
         <slot></slot>
     </div>
@@ -9,7 +47,9 @@
     export default {
         name: 'csButton',
         data() {
-            return {}
+            return {
+                clickTime: 0
+            }
         },
         props: {
             type: {
@@ -81,6 +121,24 @@
                     return ''
                 }
             }
+        },
+        methods: {
+            /**
+             点击按钮时触发
+             @param {Event} e 点击事件参数
+             @return
+             */
+            clickBtn(e) {
+                this.$emit('click', e)
+            },
+            /**
+             双击按钮时触发
+             @param {Event} e 点击事件参数
+             @return
+             */
+            dblclickBtn(e) {
+                this.$emit('dblclick', e)
+            }
         }
     }
 </script>
@@ -88,22 +146,42 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
     .csButton {
+        position: relative;
         padding: 12px 20px;
         display: inline-block;
+        vertical-align: middle;
         cursor: pointer;
         border: 1px solid #dcdfe6;
         border-radius: 4px;
         color: #606266;
         user-select: none;
+        font-size: 14px;
+        line-height: 1;
         text-align: center;
         >i {
-            font-size: 16px;
-            line-height: 16px;
+            font-size: 14px;
+            line-height: 14px;
         }
         >svg {
-            height: 16px;
-            width: 16px;
+            display: inline-block;
+            fill: #fff;
+            height: 14px;
+            width: 14px;
+            rect {
+                x: 47.5;
+                y: 41;
+                rx: 3;
+                ry: 3;
+                width: 5px;
+                height: 18px;
+            }
         }
+    }
+    .csButton:after {
+        content: '';
+        display: inline-block;
+        height: 100%;
+        vertical-align: middle;
     }
     .csButton-medium {
         padding: 10px 20px;

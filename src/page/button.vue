@@ -76,7 +76,7 @@
         </div>
 
         <div style="margin-top: 15px">
-            <csButton type="primary" loading>加载中</csButton>
+            <csButton type="primary" loading @click="clickBtn">加载中</csButton>
         </div>
     </div>
 </template>
@@ -86,6 +86,11 @@
         name: '',
         data() {
             return {}
+        },
+        methods: {
+            clickBtn() {
+                console.log(111)
+            }
         }
     }
 </script>
