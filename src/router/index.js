@@ -4,6 +4,7 @@ import container from '@/page/container'
 import layout from '@/page/layout'
 import button from '@/page/button'
 import link from '@/page/link'
+import radio from '@/page/radio'
 
 Vue.use(Router)
 
@@ -28,6 +29,11 @@ export default new Router({
             path: '/link',
             name: 'link',
             component: link
+        },
+        {
+            path: '/radio',
+            name: 'radio',
+            component: radio
         }
   ]
 })
