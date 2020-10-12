@@ -63,6 +63,9 @@
                             } else {
                                 item.componentInstance.isSelect = false
                             }
+                            if(type) {
+                                item.componentInstance.fill = this.fill
+                            }
                         }
                     })
                     if(!type) {
@@ -73,7 +76,7 @@
             watchFill() {
                 this.$slots.default.map((item)=> {
                     if(item.tag && (item.tag.indexOf('csRadio') > -1 || item.tag.indexOf('csRadioButton') > -1)) {
-                        item.fill = this.fill
+                        item.componentInstance.fill = this.fill
                     }
                 })
             }
@@ -82,7 +85,6 @@
             fill: {
                 handler: 'watchFill',
                 deep: true,   // 深度监听
-                immediate: true   //立即执行 即创建组建后能够立即执行
             }
         }
     }
