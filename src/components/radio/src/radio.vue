@@ -1,5 +1,5 @@
 <template>
-    <div :class="`csRadio ${realClass} csRadio${realDisabled}`" @click="selectRadio">
+    <div :class="`csRadio ${realClass} csRadio${realDisabled} ${realBorder}`" :style="{'--color': fill}"  @click="selectRadio">
         <i v-show="!realSelect" class="cs-icon-round csRadio-round"></i>
         <i v-show="realSelect" class="cs-icon-radioboxfill csRadio-round csRadio-select"></i>
         <span class="csRadio-label">
@@ -13,7 +13,8 @@
         name: 'csRadio',
         data() {
             return {
-                isSelect: false
+                isSelect: false,
+                fill: '#409eff'
             }
         },
         props: {
@@ -26,6 +27,10 @@
                 default: ''
             },
             disabled: {
+                type: Boolean,
+                default: false
+            },
+            border: {
                 type: Boolean,
                 default: false
             }
@@ -52,6 +57,21 @@
             realDisabled() {
                 if(this.disabled) {
                     return '-disabled'
+                } else {
+                    return ''
+                }
+            },
+            realBorder() {
+                if(this.border) {
+                    if(this.isSelect) {
+                        if(this.disabled) {
+                            return 'csRadio-border csRadio-border-select csRadio-border-disabled'
+                        } else {
+                            return 'csRadio-border csRadio-border-select'
+                        }
+                    } else {
+                        return 'csRadio-border'
+                    }
                 } else {
                     return ''
                 }
@@ -98,14 +118,14 @@
             color: #606266;
         }
         .csRadio-select {
-            color: #409eff;
+            color: var(--color);
         }
     }
     .csRadio-select {
         .csRadio-label {
             font-size: 14px;
             padding-left: 5px;
-            color: #409eff;
+            color: var(--color);
             transition: all 0.05s;
         }
     }
@@ -120,5 +140,14 @@
         .csRadio-select {
             color: #e4e7ed;
         }
+    }
+    .csRadio-border {
+        border: 1px solid #dcdfe6;
+    }
+    .csRadio-border-select {
+        border-color: var(--color);
+    }
+    .csRadio-border-disabled {
+        border-color: #ebeef5;
     }
 </style>

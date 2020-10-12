@@ -3,7 +3,7 @@ import {csContainer, csAside, csFooter, csHeader, csMain} from './container/inde
 import { csRow, csCol } from './layout/index'
 import csButton from './button/index'
 import csLink from './link/index'
-import {csRadio, csRadioGroup } from './radio'
+import {csRadio, csRadioGroup, csRadioButton } from './radio'
 
 const components = [
     csContainer,
@@ -16,7 +16,8 @@ const components = [
     csButton,
     csLink,
     csRadio,
-    csRadioGroup
+    csRadioGroup,
+    csRadioButton
 ]
 
 const install = function (Vue, options) {
@@ -42,5 +43,6 @@ export default {
     csButton,
     csLink,
     csRadio,
-    csRadioGroup
+    csRadioGroup,
+    csRadioButton
 }
