@@ -4,6 +4,7 @@ import { csRow, csCol } from './layout/index'
 import csButton from './button/index'
 import csLink from './link/index'
 import {csRadio, csRadioGroup, csRadioButton } from './radio'
+import { csCheckbox, csCheckboxGroup, csCheckboxButton } from './checkbox'
 
 const components = [
     csContainer,
@@ -17,7 +18,10 @@ const components = [
     csLink,
     csRadio,
     csRadioGroup,
-    csRadioButton
+    csRadioButton,
+    csCheckbox,
+    csCheckboxGroup,
+    csCheckboxButton
 ]
 
 const install = function (Vue, options) {
@@ -44,5 +48,8 @@ export default {
     csLink,
     csRadio,
     csRadioGroup,
-    csRadioButton
+    csRadioButton,
+    csCheckbox,
+    csCheckboxGroup,
+    csCheckboxButton
 }
