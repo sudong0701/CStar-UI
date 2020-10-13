@@ -6,6 +6,7 @@ import button from '@/page/button'
 import link from '@/page/link'
 import radio from '@/page/radio'
 import checkbox from '@/page/checkbox'
+import input from '@/page/input'
 
 Vue.use(Router)
 
@@ -40,6 +41,11 @@ export default new Router({
             path: '/checkbox',
             name: 'checkbox',
             component: checkbox
+        },
+        {
+            path: '/input',
+            name: 'input',
+            component: input
         }
   ]
 })
