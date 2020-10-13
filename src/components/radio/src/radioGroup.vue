@@ -54,6 +54,11 @@
             }
         },
         methods: {
+            /**
+             单选框改变事件
+             @param
+             @return
+             */
             changeValue(val, type) {
                 if(type || !this.disabled) {
                     this.$slots.default.map((item)=> {
@@ -73,6 +78,11 @@
                     }
                 }
             },
+            /**
+             监听fill改变事件
+             @param
+             @return
+             */
             watchFill() {
                 this.$slots.default.map((item)=> {
                     if(item.tag && (item.tag.indexOf('csRadio') > -1 || item.tag.indexOf('csRadioButton') > -1)) {

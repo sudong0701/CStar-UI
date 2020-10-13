@@ -60,6 +60,11 @@
             }
         },
         methods: {
+            /**
+             初始化复选框组
+             @param
+             @return
+             */
             initGroup() {
                 this.$slots.default.map((item)=> {
                     if(item.tag && (item.tag.indexOf('csCheckbox') > -1 || item.tag.indexOf('csCheckboxButton') > -1)) {
@@ -77,6 +82,11 @@
                     }
                 })
             },
+            /**
+             复选框改变时触发
+             @param
+             @return
+             */
             changeValue(isSelect, label) {
                 if(!this.disabled) {
                     if(isSelect) {
@@ -99,6 +109,11 @@
                     }
                 }
             },
+            /**
+             监听fill改变事件
+             @param
+             @return
+             */
             watchFill() {
                 this.$slots.default.map((item)=> {
                     if(item.tag && (item.tag.indexOf('csCheckbox') > -1 || item.tag.indexOf('csCheckboxButton') > -1)) {
@@ -106,6 +121,11 @@
                     }
                 })
             },
+            /**
+             监听disabled改变事件
+             @param
+             @return
+             */
             watchDisabled() {
                 this.$slots.default.map((item)=> {
                     if(item.tag && (item.tag.indexOf('csCheckbox') > -1 || item.tag.indexOf('csCheckboxButton') > -1)) {
