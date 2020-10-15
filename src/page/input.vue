@@ -57,7 +57,58 @@
 
         <div style="margin-top: 15px">
             <div class="textarea-item">
-                <csInput placeholder="请输入内容" type="textarea" autosize></csInput>
+                <csInput placeholder="请输入内容" type="textarea" :autosize="true"></csInput>
+            </div>
+        </div>
+
+        <div style="margin-top: 15px">
+            <div class="textarea-item">
+                <csInput placeholder="请输入内容" type="textarea" :autosize="autosize"></csInput>
+            </div>
+        </div>
+
+        <div style="margin-top: 15px">
+            <div class="input-item-lang">
+                <csInput placeholder="请输入内容">
+                    <template #prepend>https://</template>
+                </csInput>
+            </div>
+        </div>
+
+        <div style="margin-top: 15px">
+            <div class="input-item-lang">
+                <csInput placeholder="请输入内容">
+                    <template #append>.com</template>
+                </csInput>
+            </div>
+        </div>
+
+        <div style="margin-top: 15px">
+            <div class="input-item-lang">
+                <csInput placeholder="请输入内容">
+                    <template #prepend>https://</template>
+                    <template #append>
+                        <i class="cs-icon-search"></i>
+                    </template>
+                </csInput>
+            </div>
+        </div>
+
+        <div style="margin-top: 15px">
+            <div class="input-item">
+                <csInput placeholder="请输入内容" size="large"></csInput>
+            </div>
+        </div>
+
+        <div style="margin-top: 15px">
+            <div class="input-item">
+                <csInput placeholder="请输入内容" size="small"></csInput>
+            </div>
+        </div>
+
+        <div style="margin-top: 15px">
+            <div class="input-item">
+                <csInput placeholder="请输入内容" size="mini"></csInput>
             </div>
         </div>
     </div>
@@ -67,7 +118,11 @@
     export default {
         name: '',
         data() {
-            return {}
+            return {
+                autosize: {
+                    minRows: 2, maxRows: 4
+                }
+            }
         },
         methods: {}
     }
@@ -86,6 +141,9 @@
         }
         .textarea-item {
             width: 414px;
+        }
+        .input-item-lang {
+            width: 480px;
         }
     }
 </style>

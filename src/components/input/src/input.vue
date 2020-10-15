@@ -1,8 +1,13 @@
 <template>
-    <div class="csInput">
-        <input v-if="type !== 'textarea'" ref="csInput"  v-model="componentValue" :class="`csInput_inner ${realDisabled} ${realClear}`" :disabled="disabled"  :type="realType" :placeholder="placeholder" :style="{'--color': focusColor}" @focus="focus" @blur="blur">
-
-        <textarea class="csTextarea_inner" v-if="type === 'textarea'"  :rows="realRows" :placeholder="placeholder" :style="`--color: ${focusColor}; height: ${realHeight}`" @scroll="scroll"></textarea>
+    <div :class="`csInput ${realPrepend || realAppend ? 'csInput-group-prepend' : ''}`">
+        <div class="csInput-prepend" v-if="realPrepend">
+            <slot name="prepend"></slot>
+        </div>
+        <input v-if="type !== 'textarea'" ref="csInput"  v-model="componentValue" :class="`csInput_inner ${realDisabled} ${realClear} ${realPrepend ? 'csInput-inner-prepend' : ''} ${realAppend ? 'csInput-inner-append' : ''} ${realSize}`" :disabled="disabled"  :type="realType" :placeholder="placeholder" :style="{'--color': focusColor}" @focus="focus" @blur="blur">
+        <div class="csInput-append" v-if="realAppend">
+            <slot name="append"></slot>
+        </div>
+        <textarea ref="csTextarea" class="csTextarea_inner" v-if="type === 'textarea'" rows="1"  :placeholder="placeholder" :style="`--color: ${focusColor}; height: ${height}px; min-height: ${minHeight}px; max-height: ${maxHeight}px`" @input="textareaInput"></textarea>
 
         <i v-if="clear && componentValue" :class="`cs-icon-roundclose csInput-icon ${realFocus}`" @click="clearInput"></i>
         <i v-if="showPassword" v-show="isPassword" :class="`cs-icon-attention csInput-icon-password csInput-icon ${realFocus}`" @click="changePassword"></i>
@@ -28,9 +33,9 @@
                 componentValue: '',
                 isFocus: false,
                 isPassword: true,
-                height: 0,
-                minHeight: 0,
-                maxHeight: 0
+                height: '',
+                minHeight: -1,
+                maxHeight: -1
             }
         },
         props: {
@@ -77,10 +82,16 @@
             rows: {
                 type: String | Number,
                 default: 2
+            },
+            size: {
+                type: String,
+                default: ''
             }
         },
         mounted() {
-
+            if(this.type === 'textarea' && typeof this.autosize === 'boolean' && this.autosize) {
+                this.height = this.$refs.csTextarea.scrollHeight + 2
+            }
         },
         model: {
             props: 'value',
@@ -117,16 +128,23 @@
                     return 'text'
                 }
             },
-            realRows() {
-                if(!this.autosize) {
-                    return Number(this.rows)
+            realPrepend() {
+                if(this.type !== 'textarea' && this.$slots.prepend) {
+                    return true
                 } else {
-                    return ''
+                    return false
                 }
             },
-            realHeight() {
-                if(this.autosize) {
-                    return `${this.height}px`
+            realAppend() {
+                if(this.type !== 'textarea' && this.$slots.append) {
+                    return true
+                } else {
+                    return false
+                }
+            },
+            realSize() {
+                if(this.size) {
+                    return `csInput_inner-${this.size}`
                 } else {
                     return ''
                 }
@@ -160,12 +178,14 @@
                 this.isFocus = false
             },
             /**
-             textarea滚动事件
+             textarea输入事件
              @param
              @return
              */
-            scroll() {
-                console.log(111)
+            textareaInput() {
+                if(this.autosize) {
+                    this.height = this.$refs.csTextarea.scrollHeight + 2
+                }
             },
             /**
              更改密码状态
@@ -182,11 +202,9 @@
              @return
              */
             watchAutosize(val) {
-                console.log(val)
                 if(val instanceof Object) {
-
-                } else {
-
+                    this.minHeight = (val.minRows && val.minRows >= 1) ? (val.minRows - 1) * 21 + 33 :33
+                    this.maxHeight = val.maxRows ? val.maxRows * 21 + 12 : ''
                 }
             }
         },
@@ -222,6 +240,26 @@
             outline: none;
             padding: 0 15px;
             transition: border-color .2s cubic-bezier(.645,.045,.355,1);
+        }
+        .csInput_inner-large {
+            height: 36px;
+            line-height: 36px;
+        }
+        .csInput_inner-small {
+            height: 32px;
+            line-height: 32px;
+        }
+        .csInput_inner-mini {
+            height: 28px;
+            line-height: 28px;
+        }
+        .csInput-inner-prepend {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        .csInput-inner-append {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
         }
         .csInput_inner::-webkit-input-placeholder{
             font-size: 14px;
@@ -303,7 +341,7 @@
             display: block;
             resize: vertical;
             padding: 5px 15px;
-            line-height: 1.5;
+            line-height: 21px;
             box-sizing: border-box;
             width: 100%;
             font-size: inherit;
@@ -323,5 +361,50 @@
             font-size: 14px;
             color: #c0c4cc;
         }
+        .csInput-prepend {
+            background-color: #f5f7fa;
+            color: #909399;
+            vertical-align: middle;
+            display: table-cell;
+            position: relative;
+            border: 1px solid #dcdfe6;
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+            padding: 0 20px;
+            width: 1px;
+            white-space: nowrap;
+            font-size: 14px;
+            border-right: none;
+        }
+        .csInput-append {
+            background-color: #f5f7fa;
+            color: #909399;
+            vertical-align: middle;
+            display: table-cell;
+            position: relative;
+            border: 1px solid #dcdfe6;
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+            padding: 0 20px;
+            width: 1px;
+            white-space: nowrap;
+            font-size: 14px;
+            border-left: none;
+
+        }
+    }
+    .csInput-group-prepend {
+        line-height: normal;
+        display: inline-table;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .csInput-group-append {
+        line-height: normal;
+        display: inline-table;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
     }
 </style>
