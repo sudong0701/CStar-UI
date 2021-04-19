@@ -43,7 +43,7 @@ export default new Router({
             component: checkbox
         },
         {
-            path: '/input',
+            path: '/',
             name: 'input',
             component: input
         }
