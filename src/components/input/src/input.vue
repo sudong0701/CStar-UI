@@ -320,6 +320,12 @@ export default {
             handler: 'watchAutosize',
             deep: true,   // 深度监听
             immediate: true   //立即执行 即创建组建后能够立即执行
+        },
+        value: {
+            handler(newValue) {
+                this.componentValue = newValue
+            },
+            immediate: true
         }
     }
 }
@@ -417,8 +423,8 @@ export default {
         flex-direction: column;
         justify-content: flex-start;
         position: absolute;
-        height: 18px;
-        width: 18px;
+        max-height: 18px;
+        max-width: 18px;
         right: 10px;
         top: 0;
         bottom: 0;
@@ -435,8 +441,8 @@ export default {
         flex-direction: column;
         justify-content: flex-start;
         position: absolute;
-        height: 18px;
-        width: 18px;
+        max-height: 18px;
+        max-width: 18px;
         left: 7px;
         top: 0;
         bottom: 0;
