@@ -4,6 +4,7 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import CSUI from './components/index'
+import './assets/page.scss'
 
 Vue.use(CSUI)
 
