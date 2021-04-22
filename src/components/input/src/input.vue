@@ -3,7 +3,7 @@
         <div class="csInput-prepend" v-if="realPrepend">
             <slot name="prepend"></slot>
         </div>
-        <input v-if="type !== 'textarea'" ref="csInput" v-model="componentValue" :class="`csInput_inner ${realDisabled} ${realClear} ${realPrepend ? 'csInput-inner-prepend' : ''} ${realAppend ? 'csInput-inner-append' : ''} ${realSize}`" :disabled="disabled" :type="realType" :placeholder="placeholder" :style="{'--color': focusColor}" @focus="focus" @blur="blur" @input="onInput">
+        <input v-if="type !== 'textarea'" ref="csInput" v-model="componentValue" :class="`csInput_inner ${realDisabled} ${realClear} ${realPrepend ? 'csInput-inner-prepend' : ''} ${realAppend ? 'csInput-inner-append' : ''} ${realSize}`" :disabled="disabled || readonly" :type="realType" :placeholder="placeholder" :style="{'--color': focusColor}" @focus="focus" @blur="blur" @input="onInput">
         <div class="csInput-append" v-if="realAppend">
             <slot name="append"></slot>
         </div>
@@ -68,6 +68,10 @@ export default {
             type: Boolean,
             default: false
         },
+        readonly: {    //是否只读
+            type: Boolean,
+            default: false
+        },
         clear: {   //是否显示清除按钮
             type: Boolean,
             default: false
@@ -86,7 +90,7 @@ export default {
         },
         type: {   //input框的类型
             type: String,
-            default: 'text'   //text、Number、decimal
+            default: 'text'   //text、number、positive
         },
         autosize: {   //textarea高度自动调整
             type: Boolean | Object,
@@ -110,7 +114,7 @@ export default {
         },
         suggestList: {    //输入建议的数组
             type: Array,
-            default: ()=> {
+            default: () => {
                 return []
             }
         },
@@ -181,13 +185,13 @@ export default {
             }
         },
         computedSuggestList() {
-            if(!this.componentValue) {
+            if (!this.componentValue) {
                 return this.suggestList
             } else {
                 let suggestList = []
-                for(let i = 0; i < this.suggestList.length; i++) {
+                for (let i = 0; i < this.suggestList.length; i++) {
                     const suggestItem = this.suggestList[i]
-                    if(suggestItem[this.customLabel].indexOf(this.componentValue) > -1) {
+                    if (suggestItem[this.customLabel].indexOf(this.componentValue) > -1) {
                         suggestList.push(suggestItem)
                     }
                 }
@@ -272,14 +276,46 @@ export default {
                     this.componentValue = selfValue
                     this.$emit('change', selfValue)
                     break
-                case 'number':   //整数
-                    const numberValue = this.componentValue.replace(/[^\d]/g, '')   //过滤非数字
-                    this.componentValue = numberValue
-                    this.$emit('change', numberValue)
+                case 'positive':
+                    if (this.toFixed <= 0) {   //正整数(不支持小数)
+                        selfValue = this.componentValue.replace(/[^\d]/g, '')   //过滤非数字
+                    } else {   //正数(支持小数)
+                        selfValue = this.componentValue.replace(/[^\d\.]/g, '')   //过滤非数字和.
+                        selfValue = selfValue.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".")   //去除多余的.
+                        let regStr = '^(\\-)*(\\d+)\\.('
+                        for (let i = 0; i < this.toFixed; i++) {
+                            regStr += '\\d'
+                        }
+                        regStr += ').*$'
+                        const decimalReg = new RegExp(regStr)
+                        selfValue = selfValue.replace(decimalReg, '$1$2.$3')
+                    }
+                    this.componentValue = selfValue
+                    this.$emit('change', selfValue)
+                    break
+                case 'number':   //整数(允许负数)
+                    if(this.toFixed <= 0) {    //(不允许小数位)
+                        const value = `${this.componentValue}`.match(/^-?[1-9]*\d*|0/g, '')
+                        selfValue = value === null ? '' : value[0] === '-' ? '-' : value[0] === '' ? '' : Number(value[0])
+                    } else {   //允许小数位
+                        selfValue = this.componentValue.replace(/[^\d\.\-]/g, '')   //过滤非数字和.-
+                        selfValue = selfValue.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".")   //去除多余的.
+                        const result = selfValue.match(/^-?[1-9]*\d*\.*\d*|0/g, '')
+                        selfValue = result === null ? '' : result[0] === '-' ? '-' : result[0] === '' ? '' : result[0]
+                        let regStr = '^(\\-)*(\\d+)\\.('
+                        for (let i = 0; i < this.toFixed; i++) {
+                            regStr += '\\d'
+                        }
+                        regStr += ').*$'
+                        const decimalReg = new RegExp(regStr)
+                        selfValue = selfValue.replace(decimalReg, '$1$2.$3')
+                    }
+                    this.componentValue = selfValue
+                    this.$emit('change', selfValue)
                     break
                 //文本
                 case 'text':
-                    this.$emit('change', this.selfValue)
+                    this.$emit('change', this.componentValue)
                     break
             }
         },
@@ -508,11 +544,13 @@ export default {
         font-size: 14px;
         border-left: none;
     }
-    .flex-enter-active, .flex-leave-active {
-        transition: transform .2s;
+    .flex-enter-active,
+    .flex-leave-active {
+        transition: transform 0.2s;
         transform-origin: top center;
     }
-    .flex-enter, .flex-leave-to {
+    .flex-enter,
+    .flex-leave-to {
         transform: scaleY(0);
     }
     .csInput-scrollbar {
@@ -550,7 +588,7 @@ export default {
             // left: 0px;
             // right: 0px;
             //padding: 8px 0;
-             max-height: 265px;
+            max-height: 265px;
             overflow-y: auto;
             .csInput-scrollbar-item {
                 .csInput-scrollbar-item-content {

@@ -118,13 +118,19 @@
             <!-- 限制整数 -->
             <div>
                 <div class="input-item">
-                    <csInput placeholder="请输入内容" type="number"></csInput>
+                    <csInput placeholder="请输入内容" type="number" toFixed="0"></csInput>
+                </div>
+            </div>
+            <!-- 限制正整数 -->
+            <div>
+                <div class="input-item" style="margin-top: 15px">
+                    <csInput placeholder="请输入内容" type="positive" toFixed="0"></csInput>
                 </div>
             </div>
             <!-- 限制小数 不限制小数位数 -->
             <div style="margin-top: 15px">
                 <div class="input-item">
-                    <csInput placeholder="请输入内容" type="decimal"></csInput>
+                    <csInput placeholder="请输入内容" type="decimal" ></csInput>
                 </div>
             </div>
             <!-- 限制小数 限制3位小数 -->
