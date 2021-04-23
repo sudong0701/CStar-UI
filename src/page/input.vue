@@ -130,13 +130,13 @@
             <!-- 限制小数 不限制小数位数 -->
             <div style="margin-top: 15px">
                 <div class="input-item">
-                    <csInput placeholder="请输入内容" type="decimal" ></csInput>
+                    <csInput placeholder="请输入内容" type="positive" toFixed="3"></csInput>
                 </div>
             </div>
             <!-- 限制小数 限制3位小数 -->
             <div style="margin-top: 15px">
                 <div class="input-item">
-                    <csInput placeholder="请输入内容" type="decimal" toFixed="3"></csInput>
+                    <csInput placeholder="请输入内容" type="number" toFixed="3"></csInput>
                 </div>
             </div>
             <!-- 带输入建议 -->
