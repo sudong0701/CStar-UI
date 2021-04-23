@@ -252,14 +252,12 @@ export default {
          */
         onInput(e) {
             this.$emit('input', e)
+            let selfValue
             switch (this.type) {
-                //数字 支持小数
-                case 'decimal':
-                    //如果保留位数为0 则为整数
-                    let selfValue
-                    if (this.toFixed == 0) {
+                case 'positive':   //正数(不允许负数)
+                    if (this.toFixed == 0) {   //正整数(不支持小数)
                         selfValue = this.componentValue.replace(/[^\d]/g, '')   //过滤非数字
-                    } else if (this.toFixed >= 0) {     //保留tofixed小数位
+                    } else if(this.toFixed > 0) {   //正数(支持小数)
                         selfValue = this.componentValue.replace(/[^\d\.]/g, '')   //过滤非数字和.
                         selfValue = selfValue.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".")   //去除多余的.
                         let regStr = '^(\\-)*(\\d+)\\.('
@@ -269,35 +267,18 @@ export default {
                         regStr += ').*$'
                         const decimalReg = new RegExp(regStr)
                         selfValue = selfValue.replace(decimalReg, '$1$2.$3')
-                    } else {    //小于0为不限制小数位
+                    } else {    //正数(不限制小数位)
                         selfValue = this.componentValue.replace(/[^\d\.]/g, '')   //过滤非数字和.
                         selfValue = selfValue.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".")   //去除多余的.
-                    }
-                    this.componentValue = selfValue
-                    this.$emit('change', selfValue)
-                    break
-                case 'positive':
-                    if (this.toFixed <= 0) {   //正整数(不支持小数)
-                        selfValue = this.componentValue.replace(/[^\d]/g, '')   //过滤非数字
-                    } else {   //正数(支持小数)
-                        selfValue = this.componentValue.replace(/[^\d\.]/g, '')   //过滤非数字和.
-                        selfValue = selfValue.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".")   //去除多余的.
-                        let regStr = '^(\\-)*(\\d+)\\.('
-                        for (let i = 0; i < this.toFixed; i++) {
-                            regStr += '\\d'
-                        }
-                        regStr += ').*$'
-                        const decimalReg = new RegExp(regStr)
-                        selfValue = selfValue.replace(decimalReg, '$1$2.$3')
                     }
                     this.componentValue = selfValue
                     this.$emit('change', selfValue)
                     break
                 case 'number':   //整数(允许负数)
-                    if(this.toFixed <= 0) {    //(不允许小数位)
+                    if(this.toFixed == 0) {    //(不允许小数位)
                         const value = `${this.componentValue}`.match(/^-?[1-9]*\d*|0/g, '')
                         selfValue = value === null ? '' : value[0] === '-' ? '-' : value[0] === '' ? '' : Number(value[0])
-                    } else {   //允许小数位
+                    } else if(this.toFixed > 0) {   //允许小数位
                         selfValue = this.componentValue.replace(/[^\d\.\-]/g, '')   //过滤非数字和.-
                         selfValue = selfValue.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".")   //去除多余的.
                         const result = selfValue.match(/^-?[1-9]*\d*\.*\d*|0/g, '')
@@ -309,6 +290,11 @@ export default {
                         regStr += ').*$'
                         const decimalReg = new RegExp(regStr)
                         selfValue = selfValue.replace(decimalReg, '$1$2.$3')
+                    } else {   //不限制小数位
+                        selfValue = this.componentValue.replace(/[^\d\.\-]/g, '')   //过滤非数字和.-
+                        selfValue = selfValue.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".")   //去除多余的.
+                        const result = selfValue.match(/^-?[1-9]*\d*\.*\d*|0/g, '')
+                        selfValue = result === null ? '' : result[0] === '-' ? '-' : result[0] === '' ? '' : result[0]
                     }
                     this.componentValue = selfValue
                     this.$emit('change', selfValue)
