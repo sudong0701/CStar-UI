@@ -3,13 +3,14 @@
         <div class="csInput-prepend" v-if="realPrepend">
             <slot name="prepend"></slot>
         </div>
-        <input v-if="type !== 'textarea'" ref="csInput" v-model="componentValue" :class="`csInput_inner ${realDisabled} ${realClear} ${realPrepend ? 'csInput-inner-prepend' : ''} ${realAppend ? 'csInput-inner-append' : ''} ${realSize}`" :disabled="disabled || readonly" :type="realType" :placeholder="placeholder" :style="{'--color': focusColor}" @focus="focus" @blur="blur" @input="onInput">
+        <div class="csInput_inner-box">
+            <input v-if="type !== 'textarea'" ref="csInput" v-model="componentValue" :class="`csInput_inner ${realDisabled} ${realClear} ${realPrepend ? 'csInput-inner-prepend' : ''} ${realAppend ? 'csInput-inner-append' : ''} ${realSize} ${computedFocusClass}`" :disabled="disabled" :type="realType" :readonly="readonly" :placeholder="placeholder" :style="{'--color': focusColor}" @focus.stop="focus" @blur.stop="blur" @input="onInput" @mousedown.stop>
+            <i v-if="clear && componentValue && showClear" :class="`cs-icon-roundclosefill csInput-icon csInput-icon-clear ${isSelect ? 'csInput-icon-clear-transparent' : ''}`" @mousedown.stop="clearInput"></i>
+        </div>
         <div class="csInput-append" v-if="realAppend">
             <slot name="append"></slot>
         </div>
-        <textarea ref="csTextarea" class="csTextarea_inner" v-if="type === 'textarea'" rows="1" :placeholder="placeholder" :style="`--color: ${focusColor}; height: ${height}px; min-height: ${minHeight}px; max-height: ${maxHeight}px`" @input="textareaInput"></textarea>
-
-        <i v-if="clear && componentValue && isFocus" :class="`cs-icon-roundclosefill csInput-icon csInput-icon-clear`" @mousedown="clearInput"></i>
+        <textarea ref="csTextarea" class="csTextarea_inner" v-if="type === 'textarea'" rows="1" :placeholder="placeholder" :style="`--color: ${focusColor}; height: ${height}px; min-height: ${minHeight}px; max-height: ${maxHeight}px`" @input="textareaInput" @focus.stop="focus" @blur.stop="blur"></textarea>
         <i v-if="showPassword" v-show="isPassword" :class="`cs-icon-attention csInput-icon-password csInput-icon ${realFocus}`" @click="changePassword"></i>
         <i v-if="showPassword" v-show="!isPassword" :class="`cs-icon-attentionforbid csInput-icon-password csInput-icon ${realFocus}`" @click="changePassword"></i>
         <i v-if="prefixIcon" :class="`${prefixIcon} csInput-icon-prefix`"></i>
@@ -23,12 +24,15 @@
             <slot name="suffix"></slot>
         </span>
         <transition name="flex">
-            <div v-if="autocomplete && isShowSuggest" :class="`csInput-scrollbar ${realSize}`">
+            <div v-if="autocomplete && isShowSuggest" :class="`csInput-scrollbar ${realSize}`" @mouseover="isEntrance = false">
                 <div class="csInput-scrollbar_arrow"></div>
-                <div class="csInput-scrollbar-content custom-scroll">
-                    <div class="csInput-scrollbar-item" v-for="(suggestItem, key) in computedSuggestList" :key="key" @mousedown="selectSuggestItem(suggestItem, key)">
+                <div class="csInput-scrollbar-content custom-scroll" ref="csInputScroll" @scroll="scroll">
+                    <div class="csInput-scrollbar-item" v-for="(suggestItem, key) in componentSuggestList" :key="key" @mousedown.stop="selectSuggestItem(suggestItem, key)">
                         <slot name="suggestItem" :index="key" :item="suggestItem">
-                            <div class="csInput-scrollbar-item-content text_ellipsis">{{suggestItem[customLabel]}}</div>
+                            <div class="csInput-scrollbar-item-content text_ellipsis">
+                                <span :class="`${computedActive(key) ? 'csInput-scrollbar-item-active' : ''}`">{{suggestItem[customLabel]}}</span>
+                                <i v-show="computedActive(key)" class="cs-icon-check"></i>
+                            </div>
                         </slot>
                     </div>
                 </div>
@@ -48,7 +52,10 @@ export default {
             height: '',
             minHeight: -1,
             maxHeight: -1,
-            isShowSuggest: false
+            isShowSuggest: false,
+            componentSuggestList: [],
+            scrollTop: 0,
+            isEntrance: false
         }
     },
     props: {
@@ -121,6 +128,14 @@ export default {
         customLabel: {    //输入建议数组文案展示的字段
             type: String,
             default: 'label'
+        },
+        isSelect: {    //select模式 配合select使用
+            type: Boolean,
+            default: false
+        },
+        active: {
+            type: String | Number | Array,
+            default: ''
         }
     },
     mounted() {
@@ -133,6 +148,28 @@ export default {
         event: 'change'
     },
     computed: {
+        showClear() {
+            if (this.isSelect) {
+                return true
+            } else {
+                return this.isFocus
+            }
+        },
+        transparentClear() {
+            if (this.isSelect) {
+                return !this.isEntrance
+
+            } else {
+                return false
+            }
+        },
+        computedFocusClass() {
+            if (this.isFocus) {
+                return 'csInput_inner-focus'
+            } else {
+                return ''
+            }
+        },
         realDisabled() {
             if (this.disabled) {
                 return 'csInput_inner-disabled'
@@ -184,18 +221,11 @@ export default {
                 return ''
             }
         },
-        computedSuggestList() {
-            if (!this.componentValue) {
-                return this.suggestList
-            } else {
-                let suggestList = []
-                for (let i = 0; i < this.suggestList.length; i++) {
-                    const suggestItem = this.suggestList[i]
-                    if (suggestItem[this.customLabel].indexOf(this.componentValue) > -1) {
-                        suggestList.push(suggestItem)
-                    }
-                }
-                return suggestList
+        watchSuggestList() {
+            const { componentValue, suggestList } = this
+            return {
+                componentValue,
+                suggestList
             }
         }
     },
@@ -209,9 +239,14 @@ export default {
             this.$emit('clear')
             this.$emit('change', '')
             this.componentValue = ''
-            setTimeout(() => {
-                this.$refs.csInput.focus()
-            })
+            if (!this.isSelect) {
+                setTimeout(() => {
+                    this.$refs.csInput.focus()
+                })
+            }
+        },
+        $focus() {
+            this.$refs.csInput.focus()
         },
         /**
          input框获取焦点事件
@@ -222,6 +257,41 @@ export default {
             this.$emit('focus')
             this.isFocus = true
             this.isShowSuggest = true
+            //如果为select模式
+            if (this.isSelect) {
+                document.getElementsByTagName('body')[0].addEventListener('mousedown', this.hideSuggest)
+                this.$nextTick(() => {
+                    this.$refs.csInputScroll.scrollTo(0, this.scrollTop)
+                })
+            }
+        },
+        /**
+         鼠标移动到input框时触发
+         @param
+         @return
+         */
+        mouseover() {
+            this.isEntrance = true
+            this.$emit('mouseover')
+        },
+        /**
+         鼠标移出到input框时触发
+         @param
+         @return
+         */
+        mouseout() {
+            this.isEntrance = false
+            this.$emit('mouseout')
+        },
+        /**
+         隐藏输入建议
+         @param
+         @return
+         */
+        hideSuggest() {
+            console.log(111)
+            this.isFocus = false
+            this.isShowSuggest = false
         },
         /**
          input框失去焦点事件
@@ -230,7 +300,9 @@ export default {
          */
         blur() {
             this.$emit('blur')
-            this.isFocus = false
+            if (!this.isSelect) {
+                this.isFocus = false
+            }
             this.isShowSuggest = false
         },
 
@@ -241,6 +313,12 @@ export default {
          @return
          */
         selectSuggestItem(suggestItem, index) {
+            this.$emit('select', {
+                item: suggestItem, index
+            })
+            if (this.isSelect) {
+                return
+            }
             this.componentValue = suggestItem[this.customLabel]
             this.$emit('change', suggestItem[this.customLabel])
         },
@@ -257,7 +335,7 @@ export default {
                 case 'positive':   //正数(不允许负数)
                     if (this.toFixed == 0) {   //正整数(不支持小数)
                         selfValue = this.componentValue.replace(/[^\d]/g, '')   //过滤非数字
-                    } else if(this.toFixed > 0) {   //正数(支持小数)
+                    } else if (this.toFixed > 0) {   //正数(支持小数)
                         selfValue = this.componentValue.replace(/[^\d\.]/g, '')   //过滤非数字和.
                         selfValue = selfValue.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".")   //去除多余的.
                         let regStr = '^(\\-)*(\\d+)\\.('
@@ -275,10 +353,10 @@ export default {
                     this.$emit('change', selfValue)
                     break
                 case 'number':   //整数(允许负数)
-                    if(this.toFixed == 0) {    //(不允许小数位)
+                    if (this.toFixed == 0) {    //(不允许小数位)
                         const value = `${this.componentValue}`.match(/^-?[1-9]*\d*|0/g, '')
                         selfValue = value === null ? '' : value[0] === '-' ? '-' : value[0] === '' ? '' : Number(value[0])
-                    } else if(this.toFixed > 0) {   //允许小数位
+                    } else if (this.toFixed > 0) {   //允许小数位
                         selfValue = this.componentValue.replace(/[^\d\.\-]/g, '')   //过滤非数字和.-
                         selfValue = selfValue.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".")   //去除多余的.
                         const result = selfValue.match(/^-?[1-9]*\d*\.*\d*|0/g, '')
@@ -304,6 +382,15 @@ export default {
                     this.$emit('change', this.componentValue)
                     break
             }
+        },
+
+        /**
+         选项滚动时触发
+         @param {Event} e 滚动事件参数
+         @return
+         */
+        scroll(e) {
+            this.scrollTop = e.target.scrollTop
         },
 
         /**
@@ -335,7 +422,22 @@ export default {
                 this.minHeight = (val.minRows && val.minRows >= 1) ? (val.minRows - 1) * 21 + 33 : 33
                 this.maxHeight = val.maxRows ? val.maxRows * 21 + 12 : ''
             }
-        }
+        },
+        computedActive(key) {
+            if (Array.isArray(this.active)) {
+                if (this.active.indexOf(key.toString()) > -1 || this.active.indexOf(Number(key)) > -1) {
+                    return true
+                } else {
+                    return false
+                }
+            } else {
+                if (this.active !== '' && this.active == key) {
+                    return true
+                } else {
+                    return false
+                }
+            }
+        },
     },
     watch: {
         autosize: {
@@ -348,6 +450,24 @@ export default {
                 this.componentValue = newValue
             },
             immediate: true
+        },
+        watchSuggestList: {
+            handler(newValue) {
+                if (this.isSelect || !newValue.componentValue) {
+                    this.componentSuggestList = newValue.suggestList
+                } else {
+                    let suggestList = []
+                    for (let i = 0; i < newValue.suggestList.length; i++) {
+                        const suggestItem = newValue.suggestList[i]
+                        if (suggestItem[this.customLabel].indexOf(newValue.componentValue) > -1) {
+                            suggestList.push(suggestItem)
+                        }
+                    }
+                    this.componentSuggestList = suggestList
+                }
+            },
+            immediate: true,
+            deep: true
         }
     }
 }
@@ -356,6 +476,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 .csInput {
+    display: inline-block;
     position: relative;
     cursor: pointer;
     .csInput_inner {
@@ -400,7 +521,7 @@ export default {
         font-size: 14px;
         color: #c0c4cc;
     }
-    .csInput_inner:focus {
+    .csInput_inner-focus {
         outline: none;
         border-color: var(--color);
     }
@@ -430,6 +551,13 @@ export default {
     }
     .csInput-icon-clear {
         //display: block;
+        color: #c0c4cc;
+    }
+    .csInput-icon-clear-transparent {
+        display: none;
+        color: #fff;
+    }
+    .csInput-icon-clear:hover {
         color: #c0c4cc;
     }
     .csInput-icon-focus {
@@ -543,8 +671,8 @@ export default {
         position: absolute;
         top: 46px;
         left: 0;
+        right: 0;
         border: 1px solid #ebeef5;
-        width: 180px;
         padding: 8px 0;
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
         border-radius: 4px;
@@ -578,10 +706,24 @@ export default {
             overflow-y: auto;
             .csInput-scrollbar-item {
                 .csInput-scrollbar-item-content {
+                    position: relative;
                     padding: 0 20px;
-                    line-height: 34px;
-                    color: #606266;
                     cursor: pointer;
+                    span {
+                        line-height: 34px;
+                        color: #606266;
+                    }
+                    i {
+                        position: absolute;
+                        top: 0;
+                        right: 20px;
+                        line-height: 34px;
+                        font-size: 18px;
+                        color: $cs_border_focus_color;
+                    }
+                    .csInput-scrollbar-item-active {
+                        color: $cs_border_focus_color;
+                    }
                 }
                 .csInput-scrollbar-item-content:hover {
                     background: #f5f7fa;
@@ -612,5 +754,9 @@ export default {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
+}
+.csInput_inner-box:hover .csInput-icon-clear {
+    display: inline-block;
+     color: #c0c4cc;
 }
 </style>
