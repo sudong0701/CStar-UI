@@ -259,6 +259,15 @@ export default {
             this.isShowSuggest = true
             //如果为select模式
             if (this.isSelect) {
+                if(this.scrollTop === 0) {
+                    if(Array.isArray(this.active)) {
+                        if(this.active.length > 0) {
+                            this.scrollTop = this.active[0] - 4 <= 0 ? 0 : (this.active[0] - 4) * 34
+                        }
+                    } else {
+                        this.scrollTop = this.active - 4 <= 0 ? 0 : (this.active - 4) * 34
+                    }
+                }
                 document.getElementsByTagName('body')[0].addEventListener('mousedown', this.hideSuggest)
                 this.$nextTick(() => {
                     this.$refs.csInputScroll.scrollTo(0, this.scrollTop)
