@@ -136,6 +136,10 @@ export default {
         active: {
             type: String | Number | Array,
             default: ''
+        },
+        multiple: {    //是否开始select多选功能
+            type: Boolean,
+            default: false
         }
     },
     mounted() {
@@ -298,7 +302,6 @@ export default {
          @return
          */
         hideSuggest() {
-            console.log(111)
             this.isFocus = false
             this.isShowSuggest = false
         },
@@ -312,7 +315,9 @@ export default {
             if (!this.isSelect) {
                 this.isFocus = false
             }
-            this.isShowSuggest = false
+            if(!this.multiple) {
+                this.isShowSuggest = false
+            }
         },
 
         /**
