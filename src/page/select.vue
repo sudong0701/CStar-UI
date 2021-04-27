@@ -3,7 +3,7 @@
         <div class="cs-doc-demo-block">
             <div class="cs-doc-demo-block__title">基础用法</div>
             <div class="button-demo-content">
-                <cs-select v-model="value" :options="options" customLabel="name" customValue="id" clear @change="change"></cs-select>
+                <cs-select v-model="value" multiple :options="options" customLabel="name" customValue="id" clear @change="change"></cs-select>
             </div>
         </div>
     </div>
@@ -43,10 +43,12 @@ export default {
             {id: '22', name: '杨桃'},
             {id: '23', name: '人参果'},
         ]
+        setTimeout(()=> {
+            this.value = '8'
+        }, 1000)
     },
     methods: {
         change(e) {
-            console.log(e)
             
         }
     }

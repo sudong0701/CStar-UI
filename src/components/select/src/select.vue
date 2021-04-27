@@ -1,7 +1,7 @@
 <template>
     <div class="csSelect">
         <div class="csSelect-content">
-            <csInput ref="csInput" readonly autocomplete clear isSelect v-model="text" :customLabel="customLabel" :suggestList="options" :active="active" @focus="focus" @blur="blur" @select="select" @clear="clearActive"></csInput>
+            <csInput ref="csInput" readonly autocomplete clear isSelect v-model="text" :customLabel="customLabel" :suggestList="options" :active="active" :multiple="multiple" @focus="focus" @blur="blur" @select="select" @clear="clearActive"></csInput>
             <!-- <i v-show="isEntrance && value && clear" class="cs-icon-roundclosefill csSelect-content-clear"></i> -->
             <i v-show="value || clear" :class="`cs-icon-unfold ${isFocus ? 'csSelect-content-pull' : ''}`"></i>
         </div>
@@ -72,11 +72,12 @@ export default {
         select(data) {
             //开启多选
             if(this.multiple) {
-
+                let actives = Array.isArray(this.active) ? [...this.active] : []
+                actives.push(data.index)
+                this.active = actives
             } else {   //单选
                 this.active = data.index
                 this.text = data.item[this.customLabel]
-                console.log(data.item[this.customValue])
                 this.$emit('change', data.item[this.customValue])
             }
             
@@ -109,7 +110,6 @@ export default {
     watch: {
         watchValueOrOptions: {
             handler(newValue) {
-                console.log(newValue)
                 if(Array.isArray(this.value)) {
                     let actives = []
                     for(let i = 0; i < newValue.options.length; i++) {
@@ -124,6 +124,7 @@ export default {
                         const option = newValue.options[i]
                         if(newValue.value == option[this.customValue]) {
                             this.active = i
+                            this.text = option[this.customLabel]
                             break
                         }
                     }
