@@ -1,7 +1,7 @@
 <template>
     <div class="csSelect">
         <div class="csSelect-content">
-            <csInput ref="csInput" readonly autocomplete clear isSelect v-model="text" :customLabel="customLabel" :suggestList="options" :active="active" :multiple="multiple" @focus="focus" @blur="blur" @select="select" @clear="clearActive"></csInput>
+            <csInput ref="csInput" readonly autocomplete clear isSelect v-model="text" :customLabel="customLabel" :suggestList="options" :active="active" :multiple="multiple" :activeNames="textList" @focus="focus" @blur="blur" @select="select" @clear="clearActive"></csInput>
             <!-- <i v-show="isEntrance && value && clear" class="cs-icon-roundclosefill csSelect-content-clear"></i> -->
             <i v-show="value || clear" :class="`cs-icon-unfold ${isFocus ? 'csSelect-content-pull' : ''}`"></i>
         </div>
@@ -16,7 +16,8 @@ export default {
         return {
             active: '',
             text: '',
-            isFocus: false
+            isFocus: false,
+            textList: []
         }
     },
     props: {
@@ -26,7 +27,7 @@ export default {
         },
         options: {   //可选值的数组
             type: Array,
-            default: ()=> {
+            default: () => {
                 return []
             }
         },
@@ -40,7 +41,7 @@ export default {
         },
         multiple: {    //是否开启多选功能
             type: Boolean,
-             default: false
+            default: false
         },
         clear: {
             type: Boolean,
@@ -52,16 +53,19 @@ export default {
         event: 'change'
     },
     components: {
-        csInput  
+        csInput
     },
     computed: {
         watchValueOrOptions() {
-            let {value, options} = this
+            let { value, options } = this
             return {
                 value,
                 options
             }
         }
+    },
+    mounted() {
+
     },
     methods: {
         /**
@@ -71,16 +75,27 @@ export default {
          */
         select(data) {
             //开启多选
-            if(this.multiple) {
-                let actives = Array.isArray(this.active) ? [...this.active] : []
-                actives.push(data.index)
-                this.active = actives
+            if (this.multiple) {
+                let value = [...this.value]
+                let currIndex = -1
+                if(value.indexOf(data.item[this.customValue].toString()) > -1) {
+                    currIndex = value.indexOf(data.item[this.customValue].toString())
+                }
+                if(value.indexOf(Number(data.item[this.customValue])) > -1) {
+                    currIndex = value.indexOf(Number(data.item[this.customValue]))
+                }
+                if(currIndex > -1) {
+                    value.splice(currIndex, 1)
+                } else {
+                    value.push(data.item[this.customValue])
+                }
+               this.$emit('change', value)
             } else {   //单选
                 this.active = data.index
                 this.text = data.item[this.customLabel]
                 this.$emit('change', data.item[this.customValue])
             }
-            
+
         },
         /**
          input框获取焦点时触发
@@ -110,19 +125,29 @@ export default {
     watch: {
         watchValueOrOptions: {
             handler(newValue) {
-                if(Array.isArray(this.value)) {
-                    let actives = []
-                    for(let i = 0; i < newValue.options.length; i++) {
+                if (this.multiple) {   //如果开启起了多选功能
+                    if (!Array.isArray(this.value)) {    //如果value不是数组 需要转换成数组
+                        if (this.value) {
+                            this.$emit('change', [this.value])
+                        } else {
+                            this.$emit('change', [])
+                        }
+                    }
+                    let actives = [], textList = []
+                    for (let i = 0; i < newValue.options.length; i++) {
                         const option = newValue.options[i]
-                        if(newValue.value == option[this.customValue]) {
+                        if (newValue.value.indexOf(option[this.customValue].toString()) > -1 || newValue.value.indexOf(Number(option[this.customValue])) > -1) {
                             actives.push(i)
+                            textList.push(option[this.customLabel])
                         }
                     }
                     this.active = actives
-                } else {
-                    for(let i = 0; i < newValue.options.length; i++) {
+                    //console.log(textList)
+                    this.textList = textList
+                } else {   //未开启多选功能
+                    for (let i = 0; i < newValue.options.length; i++) {
                         const option = newValue.options[i]
-                        if(newValue.value == option[this.customValue]) {
+                        if (newValue.value == option[this.customValue]) {
                             this.active = i
                             this.text = option[this.customLabel]
                             break
@@ -130,7 +155,8 @@ export default {
                     }
                 }
             },
-            immediate: true
+            immediate: true,
+            deep: true
         }
     }
 }
@@ -139,19 +165,20 @@ export default {
 <style lang="scss" scoped>
 .csSelect {
     .csSelect-content {
+        display: flex;
         position: relative;
         display: inline-block;
+        height: 40px;
         i {
             position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
+            top: 12px;
             right: 8px;
             font-size: 16px;
             color: $cs_border_hover_color;
-            transition: transform .2s;
+            transition: transform 0.2s;
         }
         .csSelect-content-pull {
-            transform: translateY(-50%) rotate(180deg);
+            transform: rotate(180deg);
         }
     }
     .csSelect-content:focus-visible {

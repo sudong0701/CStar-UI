@@ -13,7 +13,7 @@
 export default {
     data() {
         return {
-            value: '',
+            value: [],
             options: []
         }
     },
@@ -44,7 +44,7 @@ export default {
             {id: '23', name: '人参果'},
         ]
         setTimeout(()=> {
-            this.value = '8'
+            //this.value = [8]
         }, 1000)
     },
     methods: {
