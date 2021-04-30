@@ -3,8 +3,13 @@
         <div class="csInput-prepend" v-if="realPrepend">
             <slot name="prepend"></slot>
         </div>
-        <div class="csInput_inner-box">
-            <input v-if="type !== 'textarea'" ref="csInput" v-model="componentValue" :class="`csInput_inner ${realDisabled} ${realClear} ${realPrepend ? 'csInput-inner-prepend' : ''} ${realAppend ? 'csInput-inner-append' : ''} ${realSize} ${computedFocusClass}`" :disabled="disabled" :type="realType" :readonly="readonly" :placeholder="placeholder" :style="{'--color': focusColor}" @focus.stop="focus" @blur.stop="blur" @input="onInput" @mousedown.stop>
+        <div :class="`csInput_inner-box ${isFocus ? 'csInput_inner-focus': ''} ${multiple && isSelect ? 'csInput_inner-box-absolute' : ''}`" :style="{'--color': focusColor}">
+            <input v-if="type !== 'textarea'" ref="csInput" v-model="componentValue" :class="`csInput_inner ${realDisabled} ${realClear} ${realPrepend ? 'csInput-inner-prepend' : ''} ${realAppend ? 'csInput-inner-append' : ''} ${realSize} ${computedFocusClass} ${inputAbsolute}`" :disabled="disabled" :type="realType" :readonly="readonly" :placeholder="placeholder" :style="{'--color': focusColor}" @focus.stop="focus" @blur.stop="blur" @input="onInput" @mousedown.stop>
+            <div class="csInput_inner-selectList" v-if="isSelect && multiple">
+                <div v-for="(item, key) in activeNames" :key="key">
+                    <span>{{item}}</span>
+                </div>
+            </div>
             <i v-if="clear && componentValue && showClear" :class="`cs-icon-roundclosefill csInput-icon csInput-icon-clear ${isSelect ? 'csInput-icon-clear-transparent' : ''}`" @mousedown.stop="clearInput"></i>
         </div>
         <div class="csInput-append" v-if="realAppend">
@@ -24,7 +29,7 @@
             <slot name="suffix"></slot>
         </span>
         <transition name="flex">
-            <div v-if="autocomplete && isShowSuggest" :class="`csInput-scrollbar ${realSize}`" @mouseover="isEntrance = false">
+            <div v-if="autocomplete && isShowSuggest && componentSuggestList.length > 0" :class="`csInput-scrollbar ${realSize}`" @mouseover="isEntrance = false">
                 <div class="csInput-scrollbar_arrow"></div>
                 <div class="csInput-scrollbar-content custom-scroll" ref="csInputScroll" @scroll="scroll">
                     <div class="csInput-scrollbar-item" v-for="(suggestItem, key) in componentSuggestList" :key="key" @mousedown.stop="selectSuggestItem(suggestItem, key)">
@@ -107,7 +112,7 @@ export default {
             type: String | Number,
             default: 2
         },
-        size: {
+        size: {    //输入框尺寸
             type: String,
             default: ''
         },
@@ -133,9 +138,13 @@ export default {
             type: Boolean,
             default: false
         },
-        active: {
+        active: {    //select当前选中的数组
             type: String | Number | Array,
             default: ''
+        },
+        activeNames: {   //选中项的名称的数组(仅在multiple为true时使用)
+            type: Array,
+            default: []
         },
         multiple: {    //是否开始select多选功能
             type: Boolean,
@@ -152,6 +161,13 @@ export default {
         event: 'change'
     },
     computed: {
+        inputAbsolute() {
+            if(this.isSelect && this.multiple) {
+                return 'csInput_inner-absolute'
+            } else {
+                return ''
+            }
+        },
         showClear() {
             if (this.isSelect) {
                 return true
@@ -168,7 +184,7 @@ export default {
             }
         },
         computedFocusClass() {
-            if (this.isFocus) {
+            if (this.isFocus && !this.isSelect && !this.multiple) {
                 return 'csInput_inner-focus'
             } else {
                 return ''
@@ -539,6 +555,14 @@ export default {
         outline: none;
         border-color: var(--color);
     }
+    .csInput_inner-absolute {
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        height: 38px;
+        border: none;
+    }
     .csInput_inner-disabled {
         background-color: #f5f7fa;
         border-color: #e4e7ed;
@@ -556,7 +580,7 @@ export default {
         position: absolute;
         height: 16px;
         width: 16px;
-        right: 8px;
+        top: 8px;
         top: 0;
         bottom: 0;
         margin: auto;
@@ -769,8 +793,23 @@ export default {
     border-collapse: separate;
     border-spacing: 0;
 }
+.csInput_inner-box {
+    position: relative;
+    border: 1px solid #fff;
+    border-radius: 4px;
+    .csInput_inner-selectList {
+        overflow: hidden;
+        position: relative;
+        z-index: 9;
+    }
+}
 .csInput_inner-box:hover .csInput-icon-clear {
     display: inline-block;
      color: #c0c4cc;
+}
+.csInput_inner-box-absolute {
+    width: 217px;
+    min-height: 40px;
+    border: 1px solid #dcdfe6;
 }
 </style>
